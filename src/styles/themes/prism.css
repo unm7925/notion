@@ -1,0 +1,230 @@
+/* 기본 색상 */
+:root {
+  --code-color: black;
+  --color-comment: slategray;
+  --color-punctuation: #999;
+  --color-tag: #905;
+  --color-attr-name: #690;
+  --color-boolean: #905;
+  --color-function: #dd4a68;
+  --color-class-name: #dd4a68;
+  --color-property: #905;
+  --color-selector: #690;
+  --color-string: #690;
+  --color-inserted: #690;
+  --color-operator: #9a6e3a;
+  --color-atrule: #07a;
+  --color-attr-value: #07a;
+  --color-important: #e90;
+  --color-regex: #e90;
+  --color-important-weight: bold;
+  --color-italic: italic;
+  --color-entity-cursor: help;
+}
+
+/* 다크 테마 색상 */
+[data-theme="dark"] {
+  --code-color: #ccc;
+  --color-comment: #999;
+  --color-punctuation: #ccc;
+  --color-tag: #e2777a;
+  --color-attr-name: #e2777a;
+  --color-function-name: #6196cc;
+  --color-boolean: #f08d49;
+  --color-function: #f08d49;
+  --color-class-name: #f8c555;
+  --color-property: #f8c555;
+  --color-selector: #cc99cd;
+  --color-string: #7ec699;
+  --color-inserted: green;
+  --color-operator: #67cdcc;
+  --color-atrule: #cc99cd;
+  --color-attr-value: #7ec699;
+  --color-important: #cc99cd;
+  --color-regex: #7ec699;
+  --color-important-weight: bold;
+  --color-italic: italic;
+  --color-entity-cursor: help;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: var(--code-color);
+  background: var(--code-background);
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection,
+pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection,
+code[class*="language-"] ::-moz-selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection,
+pre[class*="language-"] ::selection,
+code[class*="language-"]::selection,
+code[class*="language-"] ::selection {
+  text-shadow: none;
+  background: #b3d4fc;
+}
+
+@media print {
+  code[class*="language-"],
+  pre[class*="language-"] {
+    text-shadow: none;
+  }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: 1em;
+  margin: 0.5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+  background: var(--background-code);
+  min-height: 4.5em;
+  display: flex;
+  align-items: center;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: 0.1em;
+  border-radius: 0.3em;
+  white-space: normal;
+}
+
+/* Token styles */
+.token.comment,
+.token.block-comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--color-comment);
+}
+
+.token.punctuation {
+  color: var(--color-punctuation);
+}
+
+.token.tag,
+.token.namespace,
+.token.deleted {
+  color: var(--color-tag);
+}
+
+.token.attr-name {
+  color: var(--color-attr-name);
+}
+
+.token.function-name {
+  color: var(--color-function-name);
+}
+
+.token.boolean,
+.token.number {
+  color: var(--color-boolean);
+}
+
+.token.function {
+  color: var(--color-function);
+}
+
+.token.class-name {
+  color: var(--color-class-name);
+}
+
+.token.property,
+.token.constant,
+.token.symbol {
+  color: var(--color-property);
+}
+
+.token.selector,
+.token.builtin {
+  color: var(--color-selector);
+}
+
+.token.string,
+.token.char {
+  color: var(--color-string);
+}
+
+.token.inserted {
+  color: var(--color-inserted);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: var(--color-operator);
+}
+
+.token.atrule,
+.token.keyword {
+  color: var(--color-atrule);
+}
+
+.token.attr-value {
+  color: var(--color-attr-value);
+}
+
+.token.important {
+  color: var(--color-important);
+}
+
+.token.regex,
+.token.variable {
+  color: var(--color-regex);
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* Dark theme selection override for better contrast */
+[data-theme="dark"] pre[class*="language-"]::-moz-selection,
+[data-theme="dark"] pre[class*="language-"] ::-moz-selection,
+[data-theme="dark"] code[class*="language-"]::-moz-selection,
+[data-theme="dark"] code[class*="language-"] ::-moz-selection {
+  text-shadow: none;
+  background: #f0f0f0; /* Light background for selection */
+  color: #111;      /* Dark text for high contrast */
+}
+
+[data-theme="dark"] pre[class*="language-"]::selection,
+[data-theme="dark"] pre[class*="language-"] ::selection,
+[data-theme="dark"] code[class*="language-"]::selection,
+[data-theme="dark"] code[class*="language-"] ::selection {
+  text-shadow: none;
+  background: #f0f0f0; /* Light background for selection */
+  color: #111;      /* Dark text for high contrast */
+}
