@@ -15,13 +15,13 @@ type Props = {
 const PostCard: React.FC<Props> = ({ data, showMedia }) => {
   // const category = (data.category && data.category?.[0]) || undefined
 
-    const category = 
-    data.category && 
-    Array.isArray(data.category) && 
-    data.category.length > 0 && 
-    data.category[0] && 
-    String(data.category[0]).trim() !== '' 
-      ? data.category[0] 
+  const category =
+    data.category &&
+      Array.isArray(data.category) &&
+      data.category.length > 0 &&
+      data.category[0] &&
+      String(data.category[0]).trim() !== ''
+      ? data.category[0]
       : undefined
 
   return (
@@ -84,7 +84,7 @@ const StyledWrapper = styled(Link)`
     margin-bottom: 1.5rem;
     border-radius: 1rem;
     background-color: ${({ theme }) =>
-      theme.scheme === "light" ? "white" : "rgb(63 63 70)"};
+    theme.scheme === "light" ? "white" : "white"};
     transition-property: box-shadow;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 300ms;

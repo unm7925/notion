@@ -120,7 +120,7 @@ const StyledWrapper = styled.div<StyledWrapperProps>`
   .notion {
     font-family: ${pretendard.style.fontFamily};
     color: ${({ theme }) =>
-      theme === "dark" ? "rgb(209 213 219)" : "rgb(107 114 128);"};
+      theme === "dark" ? "rgb(107 114 128)" : "rgb(107 114 128);"};
     overflow-wrap: break-word;
   }
 
@@ -163,12 +163,12 @@ const StyledWrapper = styled.div<StyledWrapperProps>`
   .notion-bookmark .notion-bookmark-title,
   .notion-bookmark .notion-bookmark-link div {
     color: ${({ theme }) =>
-      theme === "dark" ? "rgb(229 231 235)" : "rgb(17 24 39);"};
+      theme === "dark" ? "rgb(17 24 39)" : "rgb(17 24 39);"};
   }
 
   .notion-bookmark .notion-bookmark-description {
     color: ${({ theme }) =>
-      theme === "dark" ? "rgb(209 213 219)" : "rgb(75 85 99);"};
+      theme === "dark" ? "rgb(75 85 99)" : "rgb(75 85 99);"};
   }
 
   .notion-code > code {
