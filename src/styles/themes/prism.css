@@ -87,6 +87,7 @@ code[class*="language-"] ::selection {
 }
 
 @media print {
+
   code[class*="language-"],
   pre[class*="language-"] {
     text-shadow: none;
@@ -106,7 +107,7 @@ pre[class*="language-"] {
 }
 
 /* Inline code */
-:not(pre) > code[class*="language-"] {
+:not(pre)>code[class*="language-"] {
   padding: 0.1em;
   border-radius: 0.3em;
   white-space: normal;
@@ -202,6 +203,7 @@ pre[class*="language-"] {
 .token.bold {
   font-weight: bold;
 }
+
 .token.italic {
   font-style: italic;
 }
@@ -216,8 +218,10 @@ pre[class*="language-"] {
 [data-theme="dark"] code[class*="language-"]::-moz-selection,
 [data-theme="dark"] code[class*="language-"] ::-moz-selection {
   text-shadow: none;
-  background: #f0f0f0; /* Light background for selection */
-  color: #111;      /* Dark text for high contrast */
+  background: #fff8d9e0;
+  /* Light background for selection */
+  color: #111;
+  /* Dark text for high contrast */
 }
 
 [data-theme="dark"] pre[class*="language-"]::selection,
@@ -225,6 +229,8 @@ pre[class*="language-"] {
 [data-theme="dark"] code[class*="language-"]::selection,
 [data-theme="dark"] code[class*="language-"] ::selection {
   text-shadow: none;
-  background: #f0f0f0; /* Light background for selection */
-  color: #111;      /* Dark text for high contrast */
+  background: #fff8d9e0;
+  /* Light background for selection */
+  color: #111;
+  /* Dark text for high contrast */
 }

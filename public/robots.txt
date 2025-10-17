@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://minssuy99-notion.vercel.app/sitemap.xml
