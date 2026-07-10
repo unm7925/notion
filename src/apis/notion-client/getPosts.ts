@@ -17,52 +17,68 @@ export const getPosts = async () => {
 
   const response = await api.getPage(id)
   id = idToUuid(id)
-  const collectionRaw = Object.values(response.collection)[0] as any
-  const collection = collectionRaw?.value?.value ?? collectionRaw?.value
   const block = response.block
-  const schema = collection?.schema
-
   const blockData = (block[id] as any)
   const rawMetadata = blockData?.value?.value ?? blockData?.value
 
   // Check Type
   if (
     rawMetadata?.type !== "collection_view_page" &&
-    rawMetadata?.type !== "collection_view"
+    rawMetadata?.type !== "collection_view" &&
+    rawMetadata?.type !== "page"
   ) {
     return []
-  } else {
-    // Construct Data
-    const pageIds = getAllPageIds(response)
-    const wholeBlocks = await (await api.getBlocks(pageIds)).recordMap.block
-
-    const data = []
-    for (let i = 0; i < pageIds.length; i++) {
-      const id = pageIds[i]
-      const properties =
-        (await getPageProperties(id, wholeBlocks, schema)) || null
-      if (!wholeBlocks[id]) continue
-
-      const blockValue = (wholeBlocks[id] as any)?.value?.value ?? wholeBlocks[id].value
-
-      // Add fullwidth, createdtime to properties
-      properties.createdTime = new Date(
-        blockValue?.created_time
-      ).toString()
-      properties.fullWidth =
-        (blockValue?.format as any)?.page_full_width ?? false
-
-      data.push(properties)
-    }
-
-    // Sort by date
-    data.sort((a: any, b: any) => {
-      const dateA: any = new Date(a?.date?.start_date || a.createdTime)
-      const dateB: any = new Date(b?.date?.start_date || b.createdTime)
-      return dateB - dateA
-    })
-
-    const posts = data as TPosts
-    return posts
   }
+
+  // 페이지 내 모든 컬렉션에서 schema 수집
+  const schemaMap = new Map<string, any>()
+  Object.entries(response.collection).forEach(([collectionId, collectionRaw]: [string, any]) => {
+    const collection = collectionRaw?.value?.value ?? collectionRaw?.value
+    if (collection?.schema) {
+      schemaMap.set(collectionId, collection.schema)
+    }
+  })
+
+  // 모든 표에서 pageId 수집
+  const pageIds = getAllPageIds(response)
+  if (pageIds.length === 0) return []
+
+  const wholeBlocks = await (await api.getBlocks(pageIds)).recordMap.block
+
+  // 각 페이지가 어느 컬렉션 소속인지 역매핑
+  const pageToSchema = new Map<string, any>()
+  Object.entries(response.collection_query).forEach(([collectionId, views]: [string, any]) => {
+    const schema = schemaMap.get(collectionId)
+    if (!schema) return
+    Object.values(views).forEach((view: any) => {
+      const ids: string[] = [
+        ...(view?.collection_group_results?.blockIds ?? []),
+        ...(view?.blockIds ?? []),
+      ]
+      ids.forEach((pid) => pageToSchema.set(pid, schema))
+    })
+  })
+
+  const data = []
+  for (let i = 0; i < pageIds.length; i++) {
+    const pid = pageIds[i]
+    if (!wholeBlocks[pid]) continue
+    const schema = pageToSchema.get(pid) ?? schemaMap.values().next().value
+    const properties = (await getPageProperties(pid, wholeBlocks, schema)) || null
+
+    const blockValue = (wholeBlocks[pid] as any)?.value?.value ?? wholeBlocks[pid].value
+    properties.createdTime = new Date(blockValue?.created_time).toString()
+    properties.fullWidth = (blockValue?.format as any)?.page_full_width ?? false
+
+    data.push(properties)
+  }
+
+  // Sort by date
+  data.sort((a: any, b: any) => {
+    const dateA: any = new Date(a?.date?.start_date || a.createdTime)
+    const dateB: any = new Date(b?.date?.start_date || b.createdTime)
+    return dateB - dateA
+  })
+
+  return data as TPosts
 }

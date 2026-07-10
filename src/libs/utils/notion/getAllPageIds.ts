@@ -6,21 +6,23 @@ export default function getAllPageIds(
   viewId?: string
 ) {
   const collectionQuery = response.collection_query
-  const views = Object.values(collectionQuery)[0]
+  const pageSet = new Set<ID>()
 
-  let pageIds: ID[] = []
   if (viewId) {
+    const views = Object.values(collectionQuery)[0]
     const vId = idToUuid(viewId)
-    pageIds = views[vId]?.blockIds
+    const ids = views[vId]?.blockIds ?? []
+    ids.forEach((id: ID) => pageSet.add(id))
   } else {
-    const pageSet = new Set<ID>()
-    // * type not exist
-    Object.values(views).forEach((view: any) => {
-      view?.collection_group_results?.blockIds?.forEach((id: ID) =>
-        pageSet.add(id)
-      )
+    Object.values(collectionQuery).forEach((views: any) => {
+      Object.values(views).forEach((view: any) => {
+        view?.collection_group_results?.blockIds?.forEach((id: ID) =>
+          pageSet.add(id)
+        )
+        view?.blockIds?.forEach((id: ID) => pageSet.add(id))
+      })
     })
-    pageIds = [...pageSet]
   }
-  return pageIds
+
+  return [...pageSet]
 }
