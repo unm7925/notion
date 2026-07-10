@@ -39,8 +39,12 @@ export const getPosts = async () => {
     }
   })
 
+  console.log("[DEBUG] collection count:", schemaMap.size)
+  console.log("[DEBUG] collection_query keys:", Object.keys(response.collection_query))
+
   // 모든 표에서 pageId 수집
   const pageIds = getAllPageIds(response)
+  console.log("[DEBUG] total pageIds:", pageIds.length)
   if (pageIds.length === 0) return []
 
   const wholeBlocks = await (await api.getBlocks(pageIds)).recordMap.block
