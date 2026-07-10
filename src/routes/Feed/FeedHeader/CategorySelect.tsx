@@ -6,38 +6,58 @@ import { DEFAULT_CATEGORY } from "src/constants"
 import styled from "@emotion/styled"
 import { useCategoriesQuery } from "src/hooks/useCategoriesQuery"
 
-type Props = {}
-
-const CategorySelect: React.FC<Props> = () => {
+const CategorySelect: React.FC = () => {
   const router = useRouter()
-  const data = useCategoriesQuery()
+  const tree = useCategoriesQuery()
   const [dropdownRef, opened, handleOpen] = useDropdown()
 
+  const currentProject = `${router.query.project || ``}` || undefined
   const currentCategory = `${router.query.category || ``}` || DEFAULT_CATEGORY
 
-  const handleOptionClick = (category: string) => {
-    router.push({
-      query: {
-        ...router.query,
-        category,
-      },
-    })
+  const displayLabel = currentProject
+    ? currentCategory !== DEFAULT_CATEGORY
+      ? `${currentProject} / ${currentCategory}`
+      : currentProject
+    : DEFAULT_CATEGORY
+
+  const handleProjectClick = (project: string) => {
+    if (project === DEFAULT_CATEGORY) {
+      router.push({ query: { ...router.query, project: undefined, category: undefined } })
+    } else {
+      router.push({ query: { ...router.query, project, category: undefined } })
+    }
   }
+
+  const handleCategoryClick = (project: string, category: string) => {
+    router.push({ query: { ...router.query, project, category } })
+  }
+
   return (
     <StyledWrapper>
       <div ref={dropdownRef} className="wrapper" onClick={handleOpen}>
-        {currentCategory} Posts <MdExpandMore />
+        {displayLabel} Posts <MdExpandMore />
       </div>
       {opened && (
         <div className="content">
-          {Object.keys(data).map((key, idx) => (
-            <div
-              className="item"
-              key={idx}
-              onClick={() => handleOptionClick(key)}
-            >
-              {`${key} (${data[key]})`}
-            </div>
+          {Object.entries(tree).map(([project, { count, categories }]) => (
+            <React.Fragment key={project}>
+              <div
+                className={`item project ${currentProject === project || (project === DEFAULT_CATEGORY && !currentProject) ? "active" : ""}`}
+                onClick={() => handleProjectClick(project)}
+              >
+                {`${project} (${count})`}
+              </div>
+              {project !== DEFAULT_CATEGORY &&
+                Object.entries(categories).map(([cat, catCount]) => (
+                  <div
+                    key={cat}
+                    className={`item category ${currentCategory === cat && currentProject === project ? "active" : ""}`}
+                    onClick={() => handleCategoryClick(project, cat)}
+                  >
+                    {`· ${cat} (${catCount})`}
+                  </div>
+                ))}
+            </React.Fragment>
           ))}
         </div>
       )}
@@ -70,17 +90,21 @@ const StyledWrapper = styled.div`
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
       0 2px 4px -1px rgba(0, 0, 0, 0.06);
     > .item {
-      padding: 0.25rem;
-      padding-left: 0.5rem;
-      padding-right: 0.5rem;
+      padding: 0.25rem 0.5rem;
       border-radius: 0.75rem;
       font-size: 0.875rem;
       line-height: 1.25rem;
       white-space: nowrap;
       cursor: pointer;
-
-      :hover {
+      &:hover {
         background-color: ${({ theme }) => theme.colors.gray4};
+      }
+      &.active {
+        font-weight: 700;
+      }
+      &.category {
+        padding-left: 1.25rem;
+        opacity: 0.8;
       }
     }
   }

@@ -5,6 +5,7 @@ interface FilterPostsParams {
   posts: TPost[]
   q: string
   tag?: string
+  project?: string
   category?: string
   order?: string
 }
@@ -13,6 +14,7 @@ export function filterPosts({
   posts,
   q,
   tag = undefined,
+  project = undefined,
   category = DEFAULT_CATEGORY,
   order = "desc",
 }: FilterPostsParams): TPost[] {
@@ -23,6 +25,7 @@ export function filterPosts({
       return (
         searchContent.toLowerCase().includes(q.toLowerCase()) &&
         (!tag || (post.tags && post.tags.includes(tag))) &&
+        (!project || post.project === project) &&
         (category === DEFAULT_CATEGORY ||
           (post.category && post.category.includes(category)))
       )

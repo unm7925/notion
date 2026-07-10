@@ -14,6 +14,7 @@ const PostList: React.FC<Props> = ({ q }) => {
   const data = usePostsQuery()
 
   const currentTag = `${router.query.tag || ``}` || undefined
+  const currentProject = `${router.query.project || ``}` || undefined
   const currentCategory = `${router.query.category || ``}` || DEFAULT_CATEGORY
   const currentOrder = `${router.query.order || ``}` || "desc"
 
@@ -22,10 +23,11 @@ const PostList: React.FC<Props> = ({ q }) => {
       posts: data,
       q,
       tag: currentTag,
+      project: currentProject,
       category: currentCategory,
       order: currentOrder,
     })
-  }, [data, q, currentTag, currentCategory, currentOrder])
+  }, [data, q, currentTag, currentProject, currentCategory, currentOrder])
 
   return (
     <>

@@ -53,12 +53,14 @@ export const getPosts = async () => {
     response.collection_query[collectionId][viewId] = collectionData.result
   }
 
-  // 페이지 내 모든 컬렉션에서 schema 수집
+  // 페이지 내 모든 컬렉션에서 schema, 이름 수집
   const schemaMap = new Map<string, any>()
+  const collectionNameMap = new Map<string, string>()
   Object.entries(response.collection).forEach(([collectionId, collectionRaw]: [string, any]) => {
     const collection = collectionRaw?.value?.value ?? collectionRaw?.value
-    if (collection?.schema) {
-      schemaMap.set(collectionId, collection.schema)
+    if (collection?.schema) schemaMap.set(collectionId, collection.schema)
+    if (collection?.name) {
+      collectionNameMap.set(collectionId, collection.name?.[0]?.[0] ?? "")
     }
   })
 
@@ -70,15 +72,20 @@ export const getPosts = async () => {
 
   // 각 페이지가 어느 컬렉션 소속인지 역매핑
   const pageToSchema = new Map<string, any>()
+  const pageToProject = new Map<string, string>()
   Object.entries(response.collection_query).forEach(([collectionId, views]: [string, any]) => {
     const schema = schemaMap.get(collectionId)
+    const projectName = collectionNameMap.get(collectionId) ?? ""
     if (!schema) return
     Object.values(views).forEach((view: any) => {
       const ids: string[] = [
         ...(view?.collection_group_results?.blockIds ?? []),
         ...(view?.blockIds ?? []),
       ]
-      ids.forEach((pid) => pageToSchema.set(pid, schema))
+      ids.forEach((pid) => {
+        pageToSchema.set(pid, schema)
+        pageToProject.set(pid, projectName)
+      })
     })
   })
 
@@ -92,6 +99,7 @@ export const getPosts = async () => {
     const blockValue = (wholeBlocks[pid] as any)?.value?.value ?? wholeBlocks[pid].value
     properties.createdTime = new Date(blockValue?.created_time).toString()
     properties.fullWidth = (blockValue?.format as any)?.page_full_width ?? false
+    properties.project = pageToProject.get(pid) ?? ""
 
     data.push(properties)
   }
