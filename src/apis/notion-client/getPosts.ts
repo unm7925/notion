@@ -30,6 +30,29 @@ export const getPosts = async () => {
     return []
   }
 
+  // response.block에서 누락된 collection_view를 찾아 수동 로드
+  const loadedCollectionIds = new Set(Object.keys(response.collection_query))
+  for (const [, blockRaw] of Object.entries(response.block)) {
+    const blockVal = (blockRaw as any)?.value?.value ?? (blockRaw as any)?.value
+    if (blockVal?.type !== "collection_view") continue
+    const collectionId: string = blockVal?.collection_id
+    const viewId: string = blockVal?.view_ids?.[0]
+    if (!collectionId || !viewId || loadedCollectionIds.has(collectionId)) continue
+    loadedCollectionIds.add(collectionId)
+
+    const collectionData = await api.getCollectionData(collectionId, viewId)
+
+    if (collectionData.recordMap.collection) {
+      Object.entries(collectionData.recordMap.collection).forEach(([cid, cRaw]: any) => {
+        response.collection[cid] = cRaw
+      })
+    }
+    if (!response.collection_query[collectionId]) {
+      response.collection_query[collectionId] = {}
+    }
+    response.collection_query[collectionId][viewId] = collectionData.result
+  }
+
   // 페이지 내 모든 컬렉션에서 schema 수집
   const schemaMap = new Map<string, any>()
   Object.entries(response.collection).forEach(([collectionId, collectionRaw]: [string, any]) => {
@@ -39,12 +62,8 @@ export const getPosts = async () => {
     }
   })
 
-  console.log("[DEBUG] collection count:", schemaMap.size)
-  console.log("[DEBUG] collection_query keys:", Object.keys(response.collection_query))
-
   // 모든 표에서 pageId 수집
   const pageIds = getAllPageIds(response)
-  console.log("[DEBUG] total pageIds:", pageIds.length)
   if (pageIds.length === 0) return []
 
   const wholeBlocks = await (await api.getBlocks(pageIds)).recordMap.block
