@@ -19,17 +19,46 @@ export default async function handler(
   try {
     if (path && typeof path === "string") {
       await res.revalidate(path)
-    } else {
-      const posts = await getPosts()
-      const revalidateRequests = posts.map((row) =>
-        res.revalidate(`/${row.slug}`)
-      )
-      await Promise.all(revalidateRequests)
-      await res.revalidate("/")
+      return res.json({ revalidated: true, paths: [path] })
     }
 
-    res.json({ revalidated: true })
-  } catch (err) {
-    return res.status(500).send("Error revalidating")
+    const posts = await getPosts()
+    // slug 없는 글은 `/undefined` 재생성 시도 → 404 → throw 하므로 걸러냄
+    const targets = posts
+      .filter((row) => !!row.slug)
+      .map((row) => `/${row.slug}`)
+
+    // 하나가 실패해도 나머지는 계속 진행 (Promise.all은 하나라도 실패 시 전체 실패)
+    const results = await Promise.allSettled([
+      ...targets.map((p) => res.revalidate(p)),
+      res.revalidate("/"),
+    ])
+
+    const failed = results
+      .map((r, i) => ({ r, path: i < targets.length ? targets[i] : "/" }))
+      .filter(({ r }) => r.status === "rejected")
+      .map(({ r, path }) => ({
+        path,
+        reason: (r as PromiseRejectedResult).reason?.message ?? String((r as PromiseRejectedResult).reason),
+      }))
+
+    if (failed.length > 0) {
+      console.error("Revalidate failures:", failed)
+      return res.status(500).json({
+        revalidated: false,
+        total: targets.length + 1,
+        failedCount: failed.length,
+        failed,
+      })
+    }
+
+    return res.json({ revalidated: true, total: targets.length + 1 })
+  } catch (err: any) {
+    console.error("Revalidate error:", err)
+    return res.status(500).json({
+      revalidated: false,
+      error: err?.message ?? String(err),
+      stack: err?.stack,
+    })
   }
 }
