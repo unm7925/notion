@@ -38,13 +38,20 @@ export const getStaticProps: GetStaticProps = async (context) => {
     return { notFound: true }
   }
 
-  const recordMap = await getRecordMap(postDetail.id!)
+  // 노션이 429(rate limit)를 뱉으면 getRecordMap이 throw → 빌드 전체가 실패한다.
+  // 페이지 하나의 일시적 실패로 배포를 죽이지 않도록, 실패 시 빌드에서 제외하고
+  // 짧은 주기로 재생성(ISR)을 유도한다. 첫 방문 시 정상 생성되어 self-heal 된다.
+  try {
+    const recordMap = await getRecordMap(postDetail.id!)
 
-  return {
-    props: {
-      post: { ...postDetail, recordMap },
-    },
-    revalidate: CONFIG.revalidateTime,
+    return {
+      props: {
+        post: { ...postDetail, recordMap },
+      },
+      revalidate: CONFIG.revalidateTime,
+    }
+  } catch (err) {
+    return { notFound: true, revalidate: 5 }
   }
 }
 
