@@ -11,9 +11,10 @@ export const createNotionClient = () =>
       headers: {
         "User-Agent": BROWSER_USER_AGENT,
       },
-      // 정적 생성 중 노션이 429(rate limit)를 뱉으면 3초 쉬었다 재시도한다.
-      retry: 5,
-      retryDelay: 3000,
+      // 정적 생성 중 노션이 429(rate limit)를 뱉으면 4초 쉬었다 재시도한다.
+      // 본문(getRecordMap) 버스트에서 몇 페이지가 걸리므로 넉넉히 8회까지.
+      retry: 8,
+      retryDelay: 4000,
       retryStatusCodes: [429, 500, 502, 503, 504],
     },
   })

@@ -10,8 +10,7 @@ import { TPosts } from "src/types"
  * @param {{ includePages: boolean }} - false: posts only / true: include pages
  */
 
-// TODO: react query를 사용해서 처음 불러온 뒤로는 해당데이터만 사용하도록 수정
-export const getPosts = async () => {
+const fetchPosts = async (): Promise<TPosts> => {
   let id = CONFIG.notionConfig.pageId as string
   const api = createNotionClient()
 
@@ -112,4 +111,31 @@ export const getPosts = async () => {
   })
 
   return data as TPosts
+}
+
+// getStaticProps가 페이지마다 getPosts를 호출해서 빌드 중 노션 전체를 수십 번 다시
+// 긁는다. 결과를 TTL(revalidateTime) 동안 메모리에 캐싱해 중복 요청을 없앤다.
+// - 빌드: 병렬도 1(단일 프로세스)이라 캐시가 살아있어 대부분 재사용됨
+// - 런타임 ISR: TTL 지나면 다시 fetch → 노션 수정 반영(동기화) 유지
+const TTL = CONFIG.revalidateTime * 1000
+let cache: { data: TPosts; ts: number } | null = null
+let inflight: Promise<TPosts> | null = null
+
+export const getPosts = async (): Promise<TPosts> => {
+  const now = Date.now()
+  if (cache && now - cache.ts < TTL) return cache.data
+
+  // 동시 호출이 겹칠 때 중복 fetch를 막고 하나의 요청을 공유한다.
+  if (inflight) return inflight
+
+  inflight = fetchPosts()
+    .then((data) => {
+      cache = { data, ts: Date.now() }
+      return data
+    })
+    .finally(() => {
+      inflight = null
+    })
+
+  return inflight
 }
